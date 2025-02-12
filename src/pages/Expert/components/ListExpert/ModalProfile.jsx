@@ -1,4 +1,4 @@
-import { Card, List, Modal, Typography } from 'antd';
+import { Card, Image, List, Modal, Typography } from 'antd';
 
 const { Text } = Typography;
 
@@ -9,6 +9,7 @@ export const ModalProfile = ({ isModalOpen, handleOk, handleCancel, data }) => {
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}>
+      <Image src={data.image} preview={false} />
       <Text strong>Expert Name:</Text> {data.name}
       <br />
       <Text strong>Schedule:</Text> {data.schedule}

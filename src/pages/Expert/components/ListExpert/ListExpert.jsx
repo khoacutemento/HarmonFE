@@ -1,4 +1,4 @@
-import { Card, List, Typography } from 'antd';
+import { Card, Image, List, Typography } from 'antd';
 import React, { useState } from 'react';
 import { ModalProfile } from './ModalProfile';
 
@@ -32,6 +32,7 @@ export const ListExpert = ({ data }) => {
               title={<Text strong>{item.name}</Text>}
               bordered
               onClick={() => showModal(item)}>
+              <Image src={item.image} preview={false} />
               <Text type='secondary'>Schedule:</Text>
               <br />
               <Text>{item.schedule}</Text>
