@@ -40,7 +40,7 @@ const AppRouting = () => {
       </Route>
       <Route path='call' element={<InCall />} />
       <Route path='*' element={<PageNotFound />} />
-      {/* <Route path='/callTest' element={<WebRTC />} /> */}
+      <Route path='/callTest' element={<Explorer />} />
     </Routes>
   );
 };

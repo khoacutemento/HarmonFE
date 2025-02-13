@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 
-const SERVER_URL = "https://localhost:7183/callhub"; // Địa chỉ Backend
+const SERVER_URL = "http://localhost:7183/callhub"; // Địa chỉ Backend
 
 const hubConnection = new signalR.HubConnectionBuilder()
   .withUrl(SERVER_URL)
