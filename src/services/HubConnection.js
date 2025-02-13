@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 
-const SERVER_URL = "http://localhost:7183/callhub"; // Địa chỉ Backend
+const SERVER_URL = "https://localhost:7183/callhub"; // Địa chỉ Backend
 
 const hubConnection = new signalR.HubConnectionBuilder()
   .withUrl(SERVER_URL)
@@ -54,6 +54,10 @@ hubConnection.on("CallAccepted", (targetId) => {
 // Xử lý khi cuộc gọi bị từ chối
 hubConnection.on("CallRejected", () => {
   console.log("❌ Cuộc gọi bị từ chối");
+});
+
+hubConnection.on("CallEnded", () => {
+  console.log("📴 Cuộc gọi đã kết thúc");
 });
 
 export default hubConnection;

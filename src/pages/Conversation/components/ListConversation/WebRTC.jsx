@@ -3,60 +3,80 @@ import hubConnection, {
   startConnection,
   acceptCall,
 } from "../../../../services/HubConnection";
+import { HubConnection } from "@microsoft/signalr";
 
 export default function WebRTC() {
   // State để lưu thông tin cuộc gọi đến (người gọi đến)
   const [incomingCaller, setIncomingCaller] = useState(null);
   // State để lưu thông tin người dùng được random (người nhận cuộc gọi)
   const [selectedUser, setSelectedUser] = useState(null);
+  // State để đánh dấu cuộc gọi đã được chấp nhận (đang hoạt động)
+  const [activeCall, setActiveCall] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerConnection = useRef(null);
 
   useEffect(() => {
-    // Khởi tạo kết nối SignalR
     const initConnection = async () => {
       await startConnection();
-      console.log();
-      if (hubConnection.state === "Connected") {
-        try {
-          await hubConnection.invoke("GetRandomUser");
-        } catch (err) {
-          console.error("❌ Lỗi khi gọi GetRandomUser:", err);
-        }
-      } else {
-        console.warn("⚠️ Kết nối SignalR chưa sẵn sàng.");
+      try {
+        await hubConnection.invoke("GetRandomUser");
+      } catch (err) {
+        console.error("❌ Lỗi khi gọi GetRandomUser:", err);
       }
     };
 
     initConnection();
 
-    // Khi có cuộc gọi đến, server gửi sự kiện "IncomingCall"
     const handleIncomingCall = (callerId) => {
       console.log("📞 Incoming call from:", callerId);
       setIncomingCaller(callerId);
     };
     hubConnection.on("IncomingCall", handleIncomingCall);
 
-    // Khi server chọn được người dùng để gọi, sẽ gửi sự kiện "RandomUserSelected"
     const handleRandomUserSelected = (targetConnectionId) => {
       console.log("🔍 Random user selected:", targetConnectionId);
       setSelectedUser(targetConnectionId);
     };
     hubConnection.on("RandomUserSelected", handleRandomUserSelected);
 
-    // Khi không có user nào sẵn, server gửi sự kiện "NoAvailableUsers"
     const handleNoAvailableUsers = () => {
       console.log("❌ No available users");
       setSelectedUser(null);
     };
     hubConnection.on("NoAvailableUsers", handleNoAvailableUsers);
 
+    // Khi cuộc gọi được chấp nhận, nhận sự kiện "CallAccepted" từ server
+    const handleCallAccepted = (partnerId) => {
+      console.log("✅ Call accepted with:", partnerId);
+      setActiveCall(true);
+      // Optionally, clear selectedUser nếu không cần hiển thị nữa
+      setSelectedUser(null);
+    };
+    hubConnection.on("CallAccepted", handleCallAccepted);
+
+    // Lắng nghe sự kiện CallEnded từ server
+    const handleCallEnded = () => {
+      console.log("📴 Cuộc gọi đã kết thúc");
+      // Đóng kết nối WebRTC (nếu đang mở) và reset UI
+      if (peerConnection.current) {
+        peerConnection.current.close();
+        peerConnection.current = null;
+      }
+      setIncomingCaller(null);
+      setSelectedUser(null);
+      setActiveCall(false);
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+      if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    };
+    hubConnection.on("CallEnded", handleCallEnded);
+
     return () => {
       hubConnection.off("IncomingCall", handleIncomingCall);
       hubConnection.off("RandomUserSelected", handleRandomUserSelected);
       hubConnection.off("NoAvailableUsers", handleNoAvailableUsers);
+      hubConnection.off("CallEnded", handleCallEnded);
     };
   }, []);
 
@@ -65,7 +85,6 @@ export default function WebRTC() {
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
-    // Gửi ICE candidate cho đối tác (dùng selectedUser khi gọi hoặc incomingCaller khi nhận)
     peerConnection.current.onicecandidate = (event) => {
       if (event.candidate && (selectedUser || incomingCaller)) {
         const targetId = selectedUser || incomingCaller;
@@ -73,14 +92,12 @@ export default function WebRTC() {
       }
     };
 
-    // Khi nhận track từ remote, hiển thị lên video
     peerConnection.current.ontrack = (event) => {
       if (remoteVideoRef.current) {
-remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
-    // Lấy media stream của local (video & audio)
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -98,7 +115,6 @@ remoteVideoRef.current.srcObject = event.streams[0];
       return;
     }
     await createPeerConnection();
-    // Gọi đến người dùng được random
     hubConnection.invoke("StartCall", selectedUser);
   };
 
@@ -107,26 +123,44 @@ remoteVideoRef.current.srcObject = event.streams[0];
     if (incomingCaller) {
       await createPeerConnection();
       acceptCall(incomingCaller);
-      // Sau khi chấp nhận, reset trạng thái incomingCaller
       setIncomingCaller(null);
     }
+  };
+
+  // Khi bấm nút "End Call", gửi sự kiện EndCall lên server.
+  const endCall = async () => {
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+    setIncomingCaller(null);
+    setSelectedUser(null);
+    setActiveCall(false);
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    await hubConnection.invoke("EndCall");
+    await hubConnection.invoke("GetRandomUser")
   };
 
   return (
     <div>
       <h2>WebRTC CallHub</h2>
 
-      {/* Hiển thị thông báo khi có cuộc gọi đến */}
       {incomingCaller && (
         <div style={{ padding: "10px", background: "#f0f0f0", marginBottom: "10px" }}>
           <strong>Cuộc gọi đến từ: {incomingCaller}</strong>
         </div>
       )}
 
-      {/* Hiển thị thông báo người dùng được random (để gọi) */}
       {selectedUser && (
         <div style={{ padding: "10px", background: "#d0f0d0", marginBottom: "10px" }}>
           <strong>Người dùng được chọn để gọi: {selectedUser}</strong>
+        </div>
+      )}
+
+      {activeCall && (
+        <div style={{ padding: "10px", background: "#e0d0f0", marginBottom: "10px" }}>
+          <strong>Cuộc gọi đang hoạt động</strong>
         </div>
       )}
 
@@ -134,8 +168,8 @@ remoteVideoRef.current.srcObject = event.streams[0];
       <video ref={remoteVideoRef} autoPlay playsInline style={{ width: "45%" }} />
 
       <button onClick={startCall}>Start Call</button>
-      {/* Chỉ hiển thị nút Accept Call khi có cuộc gọi đến */}
       {incomingCaller && <button onClick={acceptIncomingCall}>Accept Call</button>}
+      {activeCall  && <button onClick={endCall}>End Call</button>}
     </div>
   );
 }
