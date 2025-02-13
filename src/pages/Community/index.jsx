@@ -63,7 +63,7 @@ export const Community = () => {
                   { key: '4', label: 'Chuyên Gia' },
                   { key: '5', label: 'Cộng Đồng' },
                   { key: '6', label: 'Bạn Bè' },
-                  { key: '7', label: 'Blog' },
+                  // { key: '7', label: 'Blog' },
                 ]}
               />
             </Sider>

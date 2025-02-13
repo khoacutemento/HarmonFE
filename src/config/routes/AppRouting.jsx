@@ -28,7 +28,7 @@ const AppRouting = () => {
         <Route
           path=''
           element={
-            <Explorer
+            <WebRTC
               age={21}
               name={'Nguyễn Văn A'}
               distance={'10km'}
@@ -40,7 +40,7 @@ const AppRouting = () => {
       </Route>
       <Route path='call' element={<InCall />} />
       <Route path='*' element={<PageNotFound />} />
-      <Route path='/callTest' element={<WebRTC />} />
+      {/* <Route path='/callTest' element={<WebRTC />} /> */}
     </Routes>
   );
 };

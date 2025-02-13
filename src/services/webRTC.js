@@ -11,7 +11,6 @@ export const startWebRTC = async (peerConnection, remoteConnectionId) => {
   );
 };
 
-
 hubConnection.on("ReceiveOffer", async (callerId, offer) => {
   const peerConnection = new RTCPeerConnection({
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
