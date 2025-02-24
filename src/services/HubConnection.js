@@ -56,4 +56,8 @@ hubConnection.on("CallRejected", () => {
   console.log("❌ Cuộc gọi bị từ chối");
 });
 
+hubConnection.on("CallEnded", () => {
+  console.log("📴 Cuộc gọi đã kết thúc");
+});
+
 export default hubConnection;
