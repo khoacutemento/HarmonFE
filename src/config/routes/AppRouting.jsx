@@ -10,11 +10,14 @@ import { ListConversation } from '../../pages/Conversation/components/ListConver
 import { InCall } from '../../pages/Conversation/components/InCall/InCall';
 import Explorer from '../../pages/Conversation/components/Explorer/Explorer';
 import WebRTC from '../../pages/Conversation/components/ListConversation/WebRTC';
+import Login from '../../pages/Login/Login';
+import Premium from '../../pages/Premium/Premium';
 const AppRouting = () => {
   return (
     <Routes>
-      {/* <Route path='/login' element={<Login />} /> */}
+      <Route path='/login' element={<Login />} />
       {/* <Route path='/register' element={<Register />} /> */}
+      <Route path='/about' element={<Premium />} />
       <Route exact path='/' element={<HomePage />}>
         <Route path='' element={<Home />} />
       </Route>

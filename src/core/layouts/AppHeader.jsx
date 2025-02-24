@@ -30,8 +30,8 @@ const AppHeader = () => {
     },
     {
       key: '5',
-      label: 'Đăng Nhập/Đăng Ký',
-      onClick: () => navigate('/contact'),
+      label: 'Đăng Nhập',
+      onClick: () => navigate('/login'),
     },
   ];
 
