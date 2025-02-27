@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { login } from "../../services/auth";
 import { Link, useNavigate } from "react-router-dom";
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -149,4 +149,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

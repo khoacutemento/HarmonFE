@@ -1,10 +1,12 @@
-import AppRouting from './config/routes/AppRouting'
-import './App.css'
+import AppRouting from "./config/routes/AppRouting";
+import "./App.css";
 function App() {
-
   return (
-    <AppRouting/>
-  )
+    <>
+      <AppRouting />
+      {/* <Toaster position="top-right" reverseOrder={false} /> */}
+    </>
+  );
 }
 
-export default App
+export default App;
