@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
-import { login } from "../../services/auth";
 import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../redux/slice/authSlice";
+import axios from "axios";
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,18 +16,25 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await login({ username, password });
-      if (response) {
-        localStorage.setItem("accessToken", response.data.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.data));
-        toast.success("Login successfully");
+      const response = await axios.post(
+        "https://harmon.love/api/v1/auth",
+        {
+          username,
+          password,
+        }
+      );
+
+      if (response?.data?.data?.token) {
+        localStorage.setItem("refreshToken", response.data?.data?.refreshToken);
+        dispatch(loginSuccess(response.data.data.token));
+        toast.success("Đăng nhập thành công");
         navigate("/");
       } else {
-        toast.error("Login failed");
+        toast.error("Đăng nhập thất bại");
       }
     } catch (error) {
-      console.log(error.message);
-      toast.error("Login failed");
+      console.error("Error logging in:", error);
+      toast.error("Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }
@@ -32,7 +42,7 @@ const Login = () => {
 
   return (
     <div>
-      <Toaster />
+      <ToastContainer />
       <div
         style={{
           display: "flex",
@@ -91,7 +101,7 @@ const Login = () => {
                   border: "1px solid #9C83E7",
                   backgroundColor: "#E0D6FF",
                 }}
-                placeholder="Nhập email"
+                placeholder="Nhập tên đăng nhập"
                 required
               />
             </div>
@@ -138,8 +148,11 @@ const Login = () => {
             </button>
           </form>
           <p>
-            Bạn chưa có tài khoản,{" "}
-            <Link to={"/register"} style={{ color: "#4B0082" }}>
+            Bạn chưa có tài khoản?{" "}
+            <Link
+              to={"/register"}
+              style={{ color: "#4B0082", textDecoration: "none" }}
+            >
               Đăng ký ngay
             </Link>
           </p>

@@ -14,12 +14,15 @@ import Login from "../../pages/Login/Login";
 import Premium from "../../pages/Premium/Premium";
 import PrivateRoute from "./PrivateRoute";
 import Register from "../../pages/Register/Register";
+import VerifyOtp from "../../pages/Register/VerifyOtp";
+
 const AppRouting = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/experts" element={<Expert />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
       {/* <Route
         path="/experts"
         element={<PrivateRoute element={<Expert />} allowedRoles="Customer" />}

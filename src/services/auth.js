@@ -1,16 +1,24 @@
 import axios from "axios";
 
-const login = async ({ username, password }) => {
+const refreshToken = async () => {
   try {
-    const rs = await axios.post("https://harmon.love/api/v1/auth", {
-      username: username,
-      password: password,
-    });
-    return rs;
+    const response = await axios.post(
+      "https://harmon.love/api/v1/auth/refresh-token",
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.status === 200) {
+      const newAccessToken = response.data.data.accessToken;
+      localStorage.setItem("accessToken", newAccessToken);
+      return newAccessToken;
+    }
   } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
+    console.error("Lỗi khi làm mới token:", error);
+    return null;
   }
 };
 
-export { login };
+export { refreshToken };
