@@ -25,7 +25,7 @@ const VerifyOTP = () => {
 
     try {
       const response = await axios.post(
-        "https://harmon.love/api/v1/auth/verify-otp",
+        "https://harmon.love/api/v1/user/verify-otp",
         {
           email: localStorage.getItem("email"),
           otp: otp.join(""),
@@ -34,7 +34,7 @@ const VerifyOTP = () => {
 
       if (response.status === 200) {
         toast.success("Xác thực thành công");
-        navigate("/dashboard");
+        navigate("/login");
       } else {
         toast.error("Mã OTP không đúng");
       }
